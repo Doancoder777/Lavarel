@@ -218,7 +218,7 @@ class StudentController extends Controller
     }
     
     /**
-     * Show student profile
+     * Show student profile - ENHANCED VERSION WITH STATS
      */
     public function showProfile()
     {
@@ -229,11 +229,30 @@ class StudentController extends Controller
             abort(403, 'Access denied');
         }
         
-        return view('student.profile', ['student' => $student]);
+        // Get enrollment statistics
+        $stats = [
+            'total_enrollments' => $student->enrollments()->count(),
+            'completed_subjects' => $student->enrollments()->where('status', 'completed')->count(),
+            'active_enrollments' => $student->enrollments()->where('status', 'enrolled')->count(),
+            'gpa' => $student->grades()->whereNotNull('gpa_value')->avg('gpa_value') ?: 0,
+            'total_credits' => $student->enrollments()
+                ->join('subjects', 'enrollments.subject_id', '=', 'subjects.id')
+                ->where('enrollments.status', 'completed')
+                ->sum('subjects.credits')
+        ];
+        
+        // Recent grades
+        $recentGrades = $student->grades()
+            ->with(['enrollment.subject'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+        
+        return view('student.profile', compact('student', 'stats', 'recentGrades'));
     }
     
     /**
-     * Update student profile
+     * Update student profile - ENHANCED VERSION WITH BETTER VALIDATION
      */
     public function updateProfile(Request $request)
     {
@@ -248,29 +267,27 @@ class StudentController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
-            'current_password' => 'nullable|string',
+            'current_password' => 'nullable|required_with:new_password',
             'new_password' => 'nullable|string|min:6|confirmed'
         ]);
         
         // Update basic info
-        $student->update([
+        $updateData = [
             'name' => $request->name,
             'phone' => $request->phone,
-            'address' => $request->address
-        ]);
+            'address' => $request->address,
+        ];
         
-        // Update password if provided
-        if ($request->current_password && $request->new_password) {
+        // Check password change
+        if ($request->new_password) {
             if (!Hash::check($request->current_password, $student->password)) {
-                return back()->withErrors(['current_password' => 'Mật khẩu hiện tại không chính xác']);
+                return back()->withErrors(['current_password' => 'Mật khẩu hiện tại không đúng']);
             }
             
-            $student->update([
-                'password' => Hash::make($request->new_password)
-            ]);
-            
-            return back()->with('success', 'Cập nhật thông tin và mật khẩu thành công!');
+            $updateData['password'] = Hash::make($request->new_password);
         }
+        
+        $student->update($updateData);
         
         return back()->with('success', 'Cập nhật thông tin thành công!');
     }

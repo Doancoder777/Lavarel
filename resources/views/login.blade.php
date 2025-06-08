@@ -49,7 +49,7 @@
         <div class="test-accounts">
             <h4>Tài khoản test:</h4>
             <p><strong>Admin:</strong> admin@school.edu.vn / admin123</p>
-            <p><strong>Student:</strong> an@student.edu.vn / 123456</p>
+            <p><strong>Student:</strong> binh@student.edu.vn / 123456</p>
         </div>
     </div>
 </body>

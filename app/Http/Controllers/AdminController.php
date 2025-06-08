@@ -280,7 +280,7 @@ class AdminController extends Controller
      */
     public function enrollments(Request $request)
     {
-        $query = Enrollment::with(['student', 'subject']);
+        $query = Enrollment::with(['student', 'subject', 'grade']);
         
         if ($request->status) {
             $query->where('status', $request->status);
@@ -288,6 +288,20 @@ class AdminController extends Controller
         
         if ($request->semester) {
             $query->where('semester', $request->semester);
+        }
+        
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('student', function($studentQuery) use ($search) {
+                    $studentQuery->where('name', 'LIKE', "%{$search}%")
+                                 ->orWhere('student_id', 'LIKE', "%{$search}%");
+                })
+                ->orWhereHas('subject', function($subjectQuery) use ($search) {
+                    $subjectQuery->where('subject_name', 'LIKE', "%{$search}%")
+                                 ->orWhere('subject_code', 'LIKE', "%{$search}%");
+                });
+            });
         }
         
         $enrollments = $query->orderBy('created_at', 'desc')
@@ -313,5 +327,115 @@ class AdminController extends Controller
         $enrollment->update(['status' => $request->status]);
         
         return back()->with('success', 'Cập nhật trạng thái đăng ký thành công!');
+    }
+    
+    /**
+     * Reports page
+     */
+    public function reports()
+    {
+        $totalStudents = User::students()->count();
+        $totalSubjects = Subject::count();
+        $totalEnrollments = Enrollment::count();
+        $completedEnrollments = Enrollment::where('status', 'completed')->count();
+        
+        // Statistics by semester
+        $enrollmentsBySemester = Enrollment::select('semester')
+            ->selectRaw('count(*) as total')
+            ->groupBy('semester')
+            ->orderBy('semester', 'desc')
+            ->get();
+        
+        // Top subjects by enrollment
+        $topSubjects = Subject::withCount('enrollments')
+            ->orderBy('enrollments_count', 'desc')
+            ->take(10)
+            ->get();
+            
+        // Student performance
+        $gradeDistribution = Grade::selectRaw('letter_grade, count(*) as count')
+            ->whereNotNull('letter_grade')
+            ->groupBy('letter_grade')
+            ->orderBy('letter_grade')
+            ->get();
+        
+        return view('admin.reports.index', compact(
+            'totalStudents',
+            'totalSubjects', 
+            'totalEnrollments',
+            'completedEnrollments',
+            'enrollmentsBySemester',
+            'topSubjects',
+            'gradeDistribution'
+        ));
+    }
+    
+    /**
+     * Settings page - FIXED VERSION
+     */
+    public function settings()
+    {
+        try {
+            // Check if user is admin
+            if (!Auth::check() || Auth::user()->role !== 'admin') {
+                abort(403, 'Unauthorized access');
+            }
+
+            // System Information - với tất cả variables mà view cần
+            $systemInfo = [
+                'php_version' => PHP_VERSION,
+                'laravel_version' => app()->version(),
+                'database' => config('database.default', 'mysql'), // ← FIX: Thêm key 'database'
+                'environment' => config('app.env', 'local'),
+                'debug' => config('app.debug', false),
+                'cache_driver' => config('cache.default', 'file'),
+                'session_driver' => config('session.driver', 'file'),
+                'server_time' => now()->format('Y-m-d H:i:s'),
+                // Thêm các fields còn thiếu
+                'database_connection' => config('database.default'),
+                'app_env' => config('app.env'),
+                'app_debug' => config('app.debug') ? 'Enabled' : 'Disabled',
+            ];
+
+            // Database Statistics - với tất cả variables mà view cần
+            $stats = [
+                'total_users' => User::count(),
+                'total_subjects' => Subject::count(),
+                'total_enrollments' => Enrollment::count(),
+                'total_grades' => Grade::count(),
+            ];
+
+            // Admin info
+            $admin = Auth::user();
+
+            return view('admin.settings.index', compact('systemInfo', 'stats', 'admin'));
+            
+        } catch (\Exception $e) {
+            // Fallback với safe defaults nếu có lỗi
+            $systemInfo = [
+                'php_version' => PHP_VERSION,
+                'laravel_version' => '11.x',
+                'database' => 'MySQL',
+                'environment' => 'local',
+                'debug' => true,
+                'cache_driver' => 'file',
+                'session_driver' => 'file',
+                'server_time' => date('Y-m-d H:i:s'),
+                'database_connection' => 'mysql',
+                'app_env' => 'local',
+                'app_debug' => 'Enabled',
+            ];
+
+            $stats = [
+                'total_users' => 0,
+                'total_subjects' => 0,
+                'total_enrollments' => 0,
+                'total_grades' => 0,
+            ];
+
+            $admin = Auth::user();
+
+            return view('admin.settings.index', compact('systemInfo', 'stats', 'admin'));
+        }
     }
 }

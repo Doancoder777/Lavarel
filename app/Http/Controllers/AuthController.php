@@ -62,7 +62,7 @@ class AuthController extends Controller
                     <p><strong>Admin:</strong> admin@school.edu.vn / admin123 
                        <span class="quick-fill" onclick="fillAdmin()">Điền nhanh</span>
                     </p>
-                    <p><strong>Student:</strong> an@student.edu.vn / 123456
+                    <p><strong>Student:</strong> binh@student.edu.vn / 123456
                        <span class="quick-fill" onclick="fillStudent()">Điền nhanh</span>
                     </p>
                 </div>
@@ -77,7 +77,7 @@ class AuthController extends Controller
                 }
                 
                 function fillStudent() {
-                    document.getElementById("email").value = "an@student.edu.vn";
+                    document.getElementById("email").value = "binh@student.edu.vn";
                     document.getElementById("password").value = "123456";
                 }
                 

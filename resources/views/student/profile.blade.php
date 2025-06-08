@@ -10,309 +10,582 @@
                 <i class="fas fa-user-edit"></i> Hồ sơ cá nhân
             </h1>
             <p class="mb-0 opacity-90">
-                Cập nhật thông tin cá nhân và mật khẩu
+                Quản lý thông tin cá nhân và thay đổi mật khẩu
             </p>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{{ route('student.dashboard') }}" class="btn btn-light btn-lg">
-                <i class="fas fa-arrow-left"></i> Về Dashboard
-            </a>
+            <div class="profile-avatar-header">
+                <div class="avatar-circle-header">
+                    {{ substr($student->name, 0, 1) }}
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <div class="row">
-    <!-- Profile Information -->
+    <!-- Profile Form -->
     <div class="col-lg-8 mb-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-light border-0">
-                <h5 class="mb-0">
-                    <i class="fas fa-user text-primary"></i> Thông tin cá nhân
+        <div class="card border-0 shadow-lg modern-card">
+            <div class="card-header bg-gradient-primary border-0">
+                <h5 class="mb-0 text-white">
+                    <i class="fas fa-edit me-2"></i> Cập nhật thông tin
                 </h5>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form method="POST" action="{{ route('student.profile.update') }}">
                     @csrf
                     
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="name" class="form-label">Họ và tên *</label>
-                            <input type="text" 
-                                   class="form-control @error('name') is-invalid @enderror" 
-                                   id="name" 
-                                   name="name" 
-                                   value="{{ old('name', $student->name) }}" 
-                                   required>
-                            @error('name')
+                    <!-- Personal Information -->
+                    <div class="info-section mb-4">
+                        <h6 class="section-title">
+                            <i class="fas fa-user me-2"></i>
+                            Thông tin cá nhân
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Họ và tên</label>
+                                <input type="text" name="name" class="form-control modern-input @error('name') is-invalid @enderror" 
+                                       value="{{ old('name', $student->name) }}" required>
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Mã sinh viên</label>
+                                <input type="text" class="form-control modern-input" 
+                                       value="{{ $student->student_id }}" readonly>
+                                <small class="text-muted">Mã sinh viên không thể thay đổi</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Email</label>
+                                <input type="email" class="form-control modern-input" 
+                                       value="{{ $student->email }}" readonly>
+                                <small class="text-muted">Email không thể thay đổi</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Số điện thoại</label>
+                                <input type="text" name="phone" class="form-control modern-input @error('phone') is-invalid @enderror" 
+                                       value="{{ old('phone', $student->phone) }}" placeholder="Nhập số điện thoại">
+                                @error('phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Địa chỉ</label>
+                            <textarea name="address" class="form-control modern-input @error('address') is-invalid @enderror" 
+                                      rows="3" placeholder="Nhập địa chỉ">{{ old('address', $student->address) }}</textarea>
+                            @error('address')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-6">
-                            <label for="student_id" class="form-label">Mã sinh viên</label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="student_id" 
-                                   value="{{ $student->student_id }}" 
-                                   readonly
-                                   style="background-color: #f8f9fa;">
+                    </div>
+
+                    <!-- Password Change -->
+                    <div class="info-section mb-4">
+                        <h6 class="section-title">
+                            <i class="fas fa-lock me-2"></i>
+                            Thay đổi mật khẩu
+                        </h6>
+                        <small class="text-muted mb-3 d-block">Để trống nếu không muốn thay đổi mật khẩu</small>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Mật khẩu hiện tại</label>
+                                <input type="password" name="current_password" class="form-control modern-input @error('current_password') is-invalid @enderror" 
+                                       placeholder="Nhập mật khẩu hiện tại">
+                                @error('current_password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Mật khẩu mới</label>
+                                <input type="password" name="new_password" class="form-control modern-input @error('new_password') is-invalid @enderror" 
+                                       placeholder="Nhập mật khẩu mới">
+                                @error('new_password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Xác nhận mật khẩu</label>
+                                <input type="password" name="new_password_confirmation" class="form-control modern-input" 
+                                       placeholder="Xác nhận mật khẩu mới">
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" 
-                                   class="form-control" 
-                                   id="email" 
-                                   value="{{ $student->email }}" 
-                                   readonly
-                                   style="background-color: #f8f9fa;">
-                            <small class="form-text text-muted">Email không thể thay đổi</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="phone" class="form-label">Số điện thoại</label>
-                            <input type="text" 
-                                   class="form-control @error('phone') is-invalid @enderror" 
-                                   id="phone" 
-                                   name="phone" 
-                                   value="{{ old('phone', $student->phone) }}"
-                                   placeholder="Nhập số điện thoại">
-                            @error('phone')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="address" class="form-label">Địa chỉ</label>
-                        <textarea class="form-control @error('address') is-invalid @enderror" 
-                                  id="address" 
-                                  name="address" 
-                                  rows="3"
-                                  placeholder="Nhập địa chỉ của bạn">{{ old('address', $student->address) }}</textarea>
-                        @error('address')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save"></i> Cập nhật thông tin
+
+                    <!-- Submit Buttons -->
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-gradient-primary px-4">
+                            <i class="fas fa-save me-2"></i> Cập nhật thông tin
                         </button>
+                        <a href="{{ route('student.dashboard') }}" class="btn btn-outline-secondary px-4">
+                            <i class="fas fa-arrow-left me-2"></i> Quay lại
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    
+
     <!-- Profile Summary -->
     <div class="col-lg-4 mb-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-light border-0">
-                <h5 class="mb-0">
-                    <i class="fas fa-id-card text-success"></i> Thông tin hiện tại
+        <!-- Avatar & Info -->
+        <div class="card border-0 shadow-lg modern-card mb-4">
+            <div class="card-header bg-gradient-info border-0">
+                <h5 class="mb-0 text-white">
+                    <i class="fas fa-id-card me-2"></i> Thông tin sinh viên
                 </h5>
             </div>
-            <div class="card-body text-center">
-                <div class="mb-3">
-                    <i class="fas fa-user-circle fa-5x text-success mb-3"></i>
-                    <h5>{{ $student->name }}</h5>
-                    <p class="text-muted">{{ $student->student_id }}</p>
+            <div class="card-body text-center p-4">
+                <div class="profile-avatar-large mb-3">
+                    <div class="avatar-wrapper">
+                        <span>{{ substr($student->name, 0, 1) }}</span>
+                        <div class="avatar-ring"></div>
+                    </div>
+                    <div class="online-indicator-large"></div>
                 </div>
                 
-                <hr>
-                
-                <div class="text-start">
-                    <div class="mb-2">
-                        <i class="fas fa-envelope text-muted me-2"></i>
-                        <small>{{ $student->email }}</small>
+                <h4 class="profile-name">{{ $student->name }}</h4>
+                <p class="profile-id text-muted">{{ $student->student_id }}</p>
+                <p class="profile-join-date">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    Tham gia {{ $student->created_at->format('d/m/Y') }}
+                </p>
+
+                <div class="profile-details text-start mt-3">
+                    <div class="detail-item">
+                        <i class="fas fa-envelope text-primary"></i>
+                        <span>{{ $student->email }}</span>
                     </div>
                     
                     @if($student->phone)
-                    <div class="mb-2">
-                        <i class="fas fa-phone text-muted me-2"></i>
-                        <small>{{ $student->phone }}</small>
+                    <div class="detail-item">
+                        <i class="fas fa-phone text-success"></i>
+                        <span>{{ $student->phone }}</span>
                     </div>
                     @endif
                     
                     @if($student->address)
-                    <div class="mb-2">
-                        <i class="fas fa-map-marker-alt text-muted me-2"></i>
-                        <small>{{ $student->address }}</small>
+                    <div class="detail-item">
+                        <i class="fas fa-map-marker-alt text-warning"></i>
+                        <span>{{ $student->address }}</span>
                     </div>
                     @endif
                 </div>
             </div>
         </div>
-        
-        <!-- Academic Summary -->
-        <div class="card border-0 shadow-sm mt-4">
-            <div class="card-header bg-light border-0">
-                <h5 class="mb-0">
-                    <i class="fas fa-graduation-cap text-info"></i> Tóm tắt học tập
+
+        <!-- Academic Stats -->
+        <div class="card border-0 shadow-lg modern-card">
+            <div class="card-header bg-gradient-success border-0">
+                <h5 class="mb-0 text-white">
+                    <i class="fas fa-chart-line me-2"></i> Thống kê học tập
                 </h5>
             </div>
-            <div class="card-body">
-                @php
-                    $enrollments = $student->enrollments;
-                    $completedCount = $enrollments->where('status', 'completed')->count();
-                    $activeCount = $enrollments->where('status', 'enrolled')->count();
-                    $avgGpa = $enrollments->filter(function($e) { 
-                        return $e->grade && $e->grade->gpa_value; 
-                    })->avg('grade.gpa_value');
-                @endphp
-                
-                <div class="d-flex justify-content-between mb-2">
-                    <small>Môn đã hoàn thành:</small>
-                    <span class="badge bg-success">{{ $completedCount }}</span>
+            <div class="card-body p-4">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon bg-primary">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">{{ $stats['total_enrollments'] }}</div>
+                            <div class="stat-label">Tổng môn học</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon bg-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">{{ $stats['completed_subjects'] }}</div>
+                            <div class="stat-label">Hoàn thành</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon bg-warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">{{ $stats['active_enrollments'] }}</div>
+                            <div class="stat-label">Đang học</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon bg-info">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">{{ number_format($stats['gpa'], 2) }}</div>
+                            <div class="stat-label">GPA</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <small>Môn đang học:</small>
-                    <span class="badge bg-warning">{{ $activeCount }}</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <small>GPA trung bình:</small>
-                    <span class="badge bg-primary">{{ $avgGpa ? number_format($avgGpa, 2) : '0.00' }}</span>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">Thành tích gần đây:</h6>
+                    @if($recentGrades->count() > 0)
+                        <div class="recent-grades">
+                            @foreach($recentGrades->take(3) as $grade)
+                            <div class="grade-item">
+                                <div class="grade-subject">{{ $grade->enrollment->subject->subject_code }}</div>
+                                <div class="grade-score badge bg-{{ $grade->letter_grade == 'A' ? 'success' : ($grade->letter_grade == 'B' ? 'primary' : 'warning') }}">
+                                    {{ $grade->letter_grade }}
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-muted">Chưa có điểm số nào</p>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Change Password Section -->
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-light border-0">
-                <h5 class="mb-0">
-                    <i class="fas fa-lock text-warning"></i> Đổi mật khẩu
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Lưu ý:</strong> Để đảm bảo bảo mật, hãy sử dụng mật khẩu mạnh có ít nhất 6 ký tự.
-                </div>
-                
-                <form method="POST" action="{{ route('student.profile.update') }}" id="passwordForm">
-                    @csrf
-                    
-                    <!-- Hidden fields to maintain other data -->
-                    <input type="hidden" name="name" value="{{ $student->name }}">
-                    <input type="hidden" name="phone" value="{{ $student->phone }}">
-                    <input type="hidden" name="address" value="{{ $student->address }}">
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="current_password" class="form-label">Mật khẩu hiện tại *</label>
-                            <input type="password" 
-                                   class="form-control @error('current_password') is-invalid @enderror" 
-                                   id="current_password" 
-                                   name="current_password"
-                                   placeholder="Nhập mật khẩu hiện tại">
-                            @error('current_password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="new_password" class="form-label">Mật khẩu mới *</label>
-                            <input type="password" 
-                                   class="form-control @error('new_password') is-invalid @enderror" 
-                                   id="new_password" 
-                                   name="new_password"
-                                   placeholder="Nhập mật khẩu mới">
-                            @error('new_password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label for="new_password_confirmation" class="form-label">Xác nhận mật khẩu mới *</label>
-                            <input type="password" 
-                                   class="form-control" 
-                                   id="new_password_confirmation" 
-                                   name="new_password_confirmation"
-                                   placeholder="Nhập lại mật khẩu mới">
-                        </div>
-                    </div>
-                    
-                    <div class="text-end">
-                        <button type="button" class="btn btn-secondary me-2" onclick="clearPasswordForm()">
-                            <i class="fas fa-times"></i> Hủy bỏ
-                        </button>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-key"></i> Đổi mật khẩu
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+/* PROFILE PAGE STYLES */
+
+/* Modern Cards */
+.modern-card {
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.modern-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+}
+
+/* Gradient Headers */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+/* Header Avatar */
+.profile-avatar-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.avatar-circle-header {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 2rem;
+    border: 3px solid rgba(255,255,255,0.3);
+    box-shadow: 0 8px 25px rgba(255,255,255,0.2);
+}
+
+/* Form Styles */
+.modern-input {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.modern-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
+    background: white;
+}
+
+.modern-input:read-only {
+    background: #e9ecef;
+    border-color: #dee2e6;
+    color: #6c757d;
+}
+
+/* Information Sections */
+.info-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+    border-radius: 15px;
+    padding: 1.5rem;
+    border-left: 4px solid #667eea;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+}
+
+.section-title i {
+    color: #667eea;
+}
+
+/* Profile Avatar Large */
+.profile-avatar-large {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-wrapper {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 700;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(23, 162, 184, 0.3);
+}
+
+.avatar-ring {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    background: linear-gradient(45deg, #17a2b8, #138496, #20c997) border-box;
+    mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    mask-composite: subtract;
+    animation: rotate 6s linear infinite;
+}
+
+.online-indicator-large {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    background: #28a745;
+    border-radius: 50%;
+    border: 4px solid white;
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+/* Profile Info */
+.profile-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.profile-id {
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.profile-join-date {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+/* Recent Grades */
+.recent-grades {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.grade-item {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.grade-item:last-child {
+    border-bottom: none;
+}
+
+.grade-subject {
+    flex: 1;
+    font-weight: 500;
+    color: #495057;
+}
+
+.grade-score {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* Buttons */
+.btn-gradient-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    color: white;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-gradient-primary:hover {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .profile-avatar-header {
+        margin-top: 1rem;
+    }
+    
+    .avatar-circle-header {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .avatar-wrapper {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+    
+    .stat-item {
+        padding: 0.75rem;
+    }
+}
+</style>
 @endsection
-
-@push('scripts')
-<script>
-    // Clear password form
-    function clearPasswordForm() {
-        document.getElementById('passwordForm').reset();
-    }
-    
-    // Password strength indicator
-    document.addEventListener('DOMContentLoaded', function() {
-        const newPasswordInput = document.getElementById('new_password');
-        const confirmPasswordInput = document.getElementById('new_password_confirmation');
-        
-        // Add password strength indicator
-        newPasswordInput.addEventListener('input', function() {
-            const password = this.value;
-            const strength = checkPasswordStrength(password);
-            
-            // Remove existing feedback
-            const existingFeedback = this.parentNode.querySelector('.password-strength');
-            if (existingFeedback) {
-                existingFeedback.remove();
-            }
-            
-            if (password.length > 0) {
-                const feedback = document.createElement('div');
-                feedback.className = 'password-strength mt-1';
-                feedback.innerHTML = `<small class="text-${strength.color}">Độ mạnh: ${strength.text}</small>`;
-                this.parentNode.appendChild(feedback);
-            }
-        });
-        
-        // Check password confirmation match
-        confirmPasswordInput.addEventListener('input', function() {
-            const password = newPasswordInput.value;
-            const confirmPassword = this.value;
-            
-            if (confirmPassword.length > 0) {
-                if (password === confirmPassword) {
-                    this.classList.remove('is-invalid');
-                    this.classList.add('is-valid');
-                } else {
-                    this.classList.remove('is-valid');
-                    this.classList.add('is-invalid');
-                }
-            } else {
-                this.classList.remove('is-valid', 'is-invalid');
-            }
-        });
-    });
-    
-    function checkPasswordStrength(password) {
-        if (password.length < 6) {
-            return { color: 'danger', text: 'Quá yếu (cần ít nhất 6 ký tự)' };
-        } else if (password.length < 8) {
-            return { color: 'warning', text: 'Trung bình' };
-        } else if (password.match(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)) {
-            return { color: 'success', text: 'Mạnh' };
-        } else {
-            return { color: 'info', text: 'Khá (thêm chữ hoa và số để mạnh hơn)' };
-        }
-    }
-</script>
-@endpush
