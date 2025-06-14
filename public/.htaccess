@@ -1,25 +1,29 @@
-<IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
+<IfModule mod_rewrite.c>  # Chỉ thực thi nếu máy chủ Apache có kích hoạt mod_rewrite
+    <IfModule mod_negotiation.c>  # Nếu kích hoạt thêm mod_negotiation
+        Options -MultiViews -Indexes  # Tắt MultiViews (tránh xử lý mơ hồ URL) & chặn liệt kê trực tiếp
     </IfModule>
 
-    RewriteEngine On
+    RewriteEngine On  # Bật động cơ rewrite URL
+
+    # Chuyển hướng nếu truy cập trực tiếp vào index.php
+    RewriteCond %{THE_REQUEST} \s/index\.php  # Nếu yêu cầu trực tiếp chứa index.php
+    RewriteRule ^index\.php$ / [R=301,L]  # Redirect 301 về trang chủ (/) và dừng xử lý tiếp (L)
 
     # Handle Authorization Header
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    RewriteCond %{HTTP:Authorization} .  # Nếu có dòng Authorization từ phía khách
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]  # Lấy dòng Authorization truyền tiếp sang PHP
 
-    # Handle X-XSRF-Token Header
-    RewriteCond %{HTTP:x-xsrf-token} .
-    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+    # Handle X-XSRF-TOKEN Header
+    RewriteCond %{HTTP:x-xsrf-token} .  # Nếu có dòng X-XSRF-TOKEN từ phía khách
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-TOKEN}]  # Lấy dòng X-XSRF-TOKEN truyền tiếp sang PHP
 
-    # Redirect Trailing Slashes If Not A Folder...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
+    # Redirect nếu URL có slash ở cuối mà KHÔNG thật sự trỏ đến một directory
+    RewriteCond %{REQUEST_FILENAME} !-d  # Nếu KHÔNG thật sự là directory
+    RewriteCond %{REQUEST_URI} (.+)/$  # Nếu URL có slash ở cuối
+    RewriteRule ^ %1 [L,R=301]  # Redirect 301 sang URL KHÔNG có slash
 
-    # Send Requests To Front Controller...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
+    # Chuyển hướng tất cả sang index.php nếu KHÔNG tìm thấy file hoặc directory
+    RewriteCond %{REQUEST_FILENAME} !-d  # Nếu KHÔNG là directory
+    RewriteCond %{REQUEST_FILENAME} !-f  # Nếu KHÔNG là file thật
+    RewriteRule ^ index.php [L]  # Chuyển hướng sang index.php để xử lý tiếp bởi Laravel
 </IfModule>
